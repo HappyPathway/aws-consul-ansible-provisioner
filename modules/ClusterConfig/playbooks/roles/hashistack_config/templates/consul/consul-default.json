@@ -1,0 +1,7 @@
+{
+  "advertise_addr": "{{ ansible_default_ipv4.address }}",
+  "data_dir": "/opt/consul/data",
+  "client_addr": "0.0.0.0",
+  "log_level": "INFO",
+  "ui": true
+}

@@ -1,0 +1,12 @@
+- name: restart nomad
+  service: name=nomad state=restarted
+
+- name: restart consul
+  service: name=consul state=restarted
+  serial: 1
+
+- name: reload consul
+  shell: /usr/local/bin/consul reload
+
+- name: restart vault
+  service: name=vault state=restarted

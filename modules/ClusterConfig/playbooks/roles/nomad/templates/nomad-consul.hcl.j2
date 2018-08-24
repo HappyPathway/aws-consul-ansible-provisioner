@@ -1,0 +1,14 @@
+consul {
+  address        = "{{ ansible_default_ipv4.address }}:8500"
+  auto_advertise = true
+
+  {% if nomad_client is defined and nomad_client %}
+  client_service_name = "nomad-client"
+  client_auto_join    = true
+  {% endif %}
+
+  {% if nomad_server is defined and nomad_server %}
+  server_service_name = "nomad-server"
+  server_auto_join    = true
+  {% endif %}
+}

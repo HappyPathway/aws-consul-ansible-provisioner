@@ -1,0 +1,12 @@
+consul_config_dir: /etc/consul.d/
+consul_data_dir: /opt/consul/data
+consul_log_file: /opt/consul/logs/consul.log
+consul_home: /opt/consul
+consul_config_file: /etc/consul.d/consul-default.json
+consul_join_tag: consul_datacenter
+consul_acl: false
+consul_server: true
+consul_cluster: dc1
+consul_version: 1.0.7
+consul_public_binaries: true
+consul_cluster_count: 3

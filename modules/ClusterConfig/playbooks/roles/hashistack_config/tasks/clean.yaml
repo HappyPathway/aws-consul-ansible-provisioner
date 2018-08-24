@@ -1,0 +1,25 @@
+- name: clean out all datadirs
+  file: path="{{ item }}" state=absent
+  with_items:
+    - /opt/consul/data
+    - /opt/nomad/data
+    
+- name: clean out all datadirs
+  file: path="{{ item }}" state=directory
+  with_items:
+    - /opt/consul/data
+    - /opt/nomad/data
+
+- name: clean out all conf dirs
+  file: path="{{ item }}" state=absent
+  with_items:
+    - /etc/consul.d
+    - /etc/vault.d
+    - /etc/nomad.d
+
+- name: clean out all conf dirs
+  file: path="{{ item }}" state=directory
+  with_items:
+    - /etc/consul.d
+    - /etc/vault.d
+    - /etc/nomad.d

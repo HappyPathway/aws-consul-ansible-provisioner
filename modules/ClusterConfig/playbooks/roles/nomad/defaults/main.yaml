@@ -1,0 +1,4 @@
+nomad_data_dir: /opt/nomad/data
+nomad_config_dir: /etc/nomad.d/
+nomad_version: 0.8.4
+nomad_bootstrap_expect: 3

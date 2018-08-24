@@ -1,0 +1,39 @@
+- name: download nomad
+  get_url: url=https://releases.hashicorp.com/nomad/{{ nomad_version }}/nomad_{{ nomad_version }}_linux_amd64.zip dest=/tmp/nomad_{{ nomad_version }}_linux_amd64.zip
+  
+- name: install unzip
+  apt: name=unzip state=installed
+  when: ansible_os_family == "Debian"
+
+- name: unzip nomad
+  unarchive:
+    src: /tmp/nomad_{{ nomad_version }}_linux_amd64.zip
+    dest: /usr/local/bin
+    remote_src: yes
+
+- name: create proper directories
+  file: path={{ item }} state=directory mode=0755
+  with_items:
+    - "{{ nomad_config_dir }}"
+    - "{{ nomad_data_dir }}"
+    
+- name: setup configs
+  template: src="{{ item.src }}" dest="{{ item.dest }}"
+  notify: restart nomad
+  with_items:
+    - { src: "nomad-client.hcl.j2", dest: "{{ nomad_config_dir }}/nomad-client.hcl"}
+    - { src: "nomad-consul.hcl.j2", dest: "{{ nomad_config_dir }}/nomad-consul.hcl"}
+    - { src: "nomad-default.hcl.j2", dest: "{{ nomad_config_dir }}/nomad-default.hcl"}
+    - { src: "nomad-server.hcl.j2", dest: "{{ nomad_config_dir }}/nomad-server.hcl"}
+  
+- name: install supervisor
+  apt: name=supervisor state=installed
+
+- name: upload nomad supervisord script
+  copy: src=nomad.conf dest=/etc/supervisor/conf.d/nomad.conf
+
+- name: load nomad with supervisord
+  shell: "{{ item }}"
+  with_items:
+    - supervisorctl reread
+    - supervisorctl update

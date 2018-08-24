@@ -1,0 +1,22 @@
+{
+  "datacenter": "{{ consul_cluster }}",
+  "data_dir": "/opt/consul",
+  "bind_addr": "0.0.0.0",
+  "client_addr": "0.0.0.0",
+  "log_level": "DEBUG",
+  "node_name": "{{ ansible_hostname }}",
+  "server": {{ consul_server | lower }}
+  {% if consul_server|lower == "true" %}
+  , {# since server could potentially be the last item in the json hash, we need to conidtionally include , #}
+  "bootstrap_expect": {{ play_hosts | length }}
+  {% if consul_connect|lower == "true" %}
+  , {# since bootstrap could potentially be the last item in the json hash, we need to conidtionally include , #}
+  "connect": {
+    "enabled": true,
+    "proxy": {
+        "allow_managed_root": true
+    }
+  }
+  {% endif %}
+  {% endif %}
+}

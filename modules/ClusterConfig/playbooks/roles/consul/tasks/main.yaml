@@ -1,0 +1,38 @@
+- name: what host?
+  debug: msg="{{ ansible_hostname }}:{{ ansible_default_ipv4.address }}"
+
+- name: download consul agent
+  get_url: url=https://releases.hashicorp.com/consul/{{ consul_version }}/consul_{{ consul_version }}_linux_amd64.zip dest=/tmp/consul_{{ consul_version }}_linux_amd64.zip
+  when: consul_binary is not defined
+
+- name: Download Private consul agent
+  ignore_errors: yes
+  copy: src="{{ consul_binary }}" dest=/tmp/consul_{{ consul_version }}_linux_amd64.zip
+  when: consul_binary is defined
+
+- name: install unzip
+  apt: name=unzip state=installed
+  when: ansible_os_family == "Debian"
+
+- name: unzip consul
+  notify: restart consul
+  unarchive:
+    src: /tmp/consul_{{ consul_version }}_linux_amd64.zip
+    dest: /usr/local/bin
+    remote_src: yes
+
+- name: initialize install
+  notify: restart consul
+  include: initialize.yaml
+  when: consul_init is defined and consul_init
+
+- name: flush handlers
+  meta: flush_handlers
+
+- name: wait for consul port
+  wait_for: port=8301 
+
+- name: join consul cluster
+  shell: /usr/local/bin/consul join {{ hostvars[item]['ansible_default_ipv4']['address'] }}:8301
+  with_items: "{{ play_hosts }}"
+  run_once: true

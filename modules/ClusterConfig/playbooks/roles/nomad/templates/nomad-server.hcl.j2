@@ -1,0 +1,5 @@
+server {
+  enabled          = true
+  bootstrap_expect = {% nomad_bootstrap_expect %}
+  heartbeat_grace  = "30s"
+}

@@ -1,0 +1,25 @@
+- name: create proper directories
+  file: path={{ item }} state=directory mode=0755
+  with_items:
+    - "{{ consul_config_dir }}"
+    - "{{ consul_data_dir }}"
+    
+- name: setup config file
+  template: src=consul-default.json.j2 dest={{ consul_config_file }} mode=0755 owner=root
+
+- name: install supervisor
+  apt: name=supervisor state=installed
+
+- name: upload consul supervisord script
+  copy: src=consul_server.conf dest=/etc/supervisor/conf.d/consul.conf
+  when: "{{ consul_server|lower == 'true' }}"
+
+- name: upload consul supervisord script
+  copy: src=consul_agent.conf dest=/etc/supervisor/conf.d/consul.conf
+  when: "{{ consul_server|lower == 'false' }}"
+
+- name: load consul with supervisord
+  shell: "{{ item }}"
+  with_items:
+    - supervisorctl reread
+    - supervisorctl update

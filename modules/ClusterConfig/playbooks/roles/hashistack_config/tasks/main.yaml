@@ -1,0 +1,38 @@
+
+- name: clean out directories
+  include: clean.yaml
+  when: destroy is defined
+
+- name: setup consul templates
+  template: src="consul/{{ item }}" dest="/etc/consul.d"
+  notify: restart consul
+  with_items:
+    - consul-default.json
+    - consul-server.json
+
+- meta: flush_handlers
+
+- name: Wait 300 seconds for port 8301 to become open on the host, don't start checking for 10 seconds
+  wait_for:
+    port: 8301
+
+- name: join consul cluster
+  shell: /usr/local/bin/consul join {{ hostvars[item]['ansible_default_ipv4']['address'] }}:8301
+  with_items: "{{ play_hosts }}"
+  run_once: true
+
+- name: setup vault templates
+  template: src="vault/{{ item }}" dest="/etc/vault.d"
+  notify: restart vault
+  with_items:
+    - vault-consul.hcl
+    - vault-no-tls.hcl
+    
+- name: setup nomad templates
+  template: src="nomad/{{ item }}" dest="/etc/nomad.d"
+  notify: restart nomad
+  with_items:
+    - nomad-client.hcl
+    - nomad-consul.hcl
+    - nomad-default.hcl
+    - nomad-server.hcl
